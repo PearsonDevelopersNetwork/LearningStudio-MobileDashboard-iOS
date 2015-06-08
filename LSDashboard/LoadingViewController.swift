@@ -53,24 +53,35 @@ class LoadingViewController: UIViewController {
         // reset loading progress
         loadingProgress.progress = 0
         
-        // User details have been loaded during authentication with /me
-        var firstName = LearningStudio.api.userData?.me!["firstName"] as! String
-        greetingLabel.text = "Welcome, \(firstName)!"
+
         
         // load the user's activity
-        LearningStudio.api.reloadData({ (error) -> Void in
-            dispatch_async(dispatch_get_main_queue()) {
-                if error == nil {
-                    // show the main display
-                    LearningStudio.api.proceedToDashboard()
-                }
-                else {
-                    // log the user out
-                    LearningStudio.api.promptForCredentials()
-                }
+        LearningStudio.api.getMe({ (error) -> Void in
+            
+            // User details have been loaded during authentication with /me
+            var firstName = LearningStudio.api.userData?.me!["firstName"] as! String
+            self.greetingLabel.text = "Welcome, \(firstName)!"
+            
+            if error == nil {
+                LearningStudio.api.reloadData({ (error) -> Void in
+                    dispatch_async(dispatch_get_main_queue()) {
+                        if error == nil {
+                            // show the main display
+                            LearningStudio.api.proceedToDashboard()
+                        }
+                        else {
+                            // log the user out
+                            LearningStudio.api.promptForCredentials()
+                        }
+                    }
+                    self.incrementProgress()
+                })
             }
-            self.incrementProgress()
+            else {
+               LearningStudio.api.promptForCredentials()
+            }
         })
+        
     }
 
     override func didReceiveMemoryWarning() {

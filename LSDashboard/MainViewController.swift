@@ -35,6 +35,7 @@ import UIKit
 class MainViewController: UIViewController {
     private var firstLoad = true
     
+    // windows are loaded and can be segued to here
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -48,25 +49,13 @@ class MainViewController: UIViewController {
         // This class has references to all views
         LearningStudio.api.mainView = self
  
-        // Only need to prompt for credential is they're missing
+        // Only need to prompt for credential if they're missing
         if LearningStudio.api.restoreCredentials() {
-            // Load the user info if credentials are present
-            LearningStudio.api.getMe({ (error) -> Void in
-                
-                dispatch_async(dispatch_get_main_queue()) {
-
-                    if error == nil {
-                        self.showLoading() // proceed with loading
-                    }
-                    else {
-                        self.showLogin() // force login
-                    }
-                }
-            })
+            self.performSegueWithIdentifier("loadingSegue", sender: self)
 
         }
         else {
-            showLogin() // force login
+             self.performSegueWithIdentifier("loginSegue", sender: self)
         }
     }
 
@@ -77,6 +66,7 @@ class MainViewController: UIViewController {
         // archive the user data before clearing it from memory
         LearningStudio.api.saveUserDataArchive()
     }
+    
     
     // MARK: - Screen Switching
     // still NOT the "right" way to switch screens, but I'm still learning...

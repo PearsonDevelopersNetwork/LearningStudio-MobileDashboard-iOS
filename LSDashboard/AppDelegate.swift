@@ -70,13 +70,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         var badgeNumber = UIApplication.sharedApplication().applicationIconBadgeNumber
         if badgeNumber > 0 {
             if LearningStudio.api.restoreCredentials() {
-                LearningStudio.api.getMe({ (error) -> Void in
-                    if error == nil {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            LearningStudio.api.proceedWithRefresh()
-                        }
-                    }
-                })
+                dispatch_async(dispatch_get_main_queue()) {
+                    LearningStudio.api.proceedWithRefresh()
+                }
             }
             UIApplication.sharedApplication().applicationIconBadgeNumber = 0
         }
