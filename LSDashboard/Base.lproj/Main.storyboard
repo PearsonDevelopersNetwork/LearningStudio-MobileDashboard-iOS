@@ -18,6 +18,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
+                    <connections>
+                        <segue destination="aOC-En-JeW" kind="presentation" identifier="loginSegue" animates="NO" id="TRg-Oe-Gxd"/>
+                        <segue destination="xGp-MA-5ee" kind="presentation" identifier="loadingSegue" animates="NO" id="hoi-nQ-1Qp"/>
+                        <segue destination="6CY-Y9-DH1" kind="presentation" identifier="tabsSegue" animates="NO" id="YHh-gi-LOR"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -1178,7 +1183,7 @@
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aaF-hu-BBj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="160.5" y="1038"/>
+            <point key="canvasLocation" x="160.5" y="1135.5"/>
         </scene>
         <!--Loading View Controller-->
         <scene sceneID="uSW-xL-ESW">
@@ -1333,7 +1338,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UZt-Pr-kSg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1000" y="1045"/>
+            <point key="canvasLocation" x="990" y="1135.5"/>
         </scene>
     </scenes>
     <resources>

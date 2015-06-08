@@ -33,19 +33,21 @@ import UIKit
 
 // All view changes are initiated by this controller
 class MainViewController: UIViewController {
-    private var loginViewController: LoginViewController!
-    private var tabViewController: TabViewController!
-    private var loadingViewController: LoadingViewController!
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+    private var firstLoad = true
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if !firstLoad {
+            return
+        }
+        
+        firstLoad = false
         
         // The api class does some of the view switching
         // This class has references to all views
         LearningStudio.api.mainView = self
-        
+ 
         // Only need to prompt for credential is they're missing
         if LearningStudio.api.restoreCredentials() {
             // Load the user info if credentials are present
@@ -77,78 +79,31 @@ class MainViewController: UIViewController {
     }
     
     // MARK: - Screen Switching
-    // NOT the "right" way to switch screens, but I'm still learning...
+    // still NOT the "right" way to switch screens, but I'm still learning...
     
     
     // Tabs can be viewed after data is loaded
     func showTabs() {
-        if tabViewController == nil {
-            tabViewController = storyboard?.instantiateViewControllerWithIdentifier("Tabs") as! TabViewController
-        }
-        
+ 
         dispatch_after( // login feels more graceful with a delay here... progress bar completes
                     dispatch_time(DISPATCH_TIME_NOW,Int64(0.5 * Double(NSEC_PER_SEC))), // 1/2 second
                     dispatch_get_main_queue()) {
-            self.switchViewController(to: self.tabViewController)
+            self.dismissViewControllerAnimated(false, completion: nil)
+            self.performSegueWithIdentifier("tabsSegue", sender: self)
         }
+
     }
     
     // Login will be viewed when credentials are missing, logout occurs, or error occurs
     func showLogin() {
-        if loginViewController == nil {
-            loginViewController = storyboard?.instantiateViewControllerWithIdentifier("Login") as! LoginViewController
-        }
-        
-        var previousViewController: UIViewController? = findCurrentViewController()
-        switchViewController(to: loginViewController)
+        self.dismissViewControllerAnimated(false, completion: nil)
+        self.performSegueWithIdentifier("loginSegue", sender: self)
     }
     
     // Loading screen appears at startup and during data refreshes
     func showLoading() {
-        if loadingViewController == nil {
-            loadingViewController = storyboard?.instantiateViewControllerWithIdentifier("Loading") as! LoadingViewController
-        }
-        
-        var previousViewController: UIViewController? = findCurrentViewController()
-        switchViewController(to: loadingViewController)
-    }
-    
-    // Determine which view controller is currently in charge
-    private func findCurrentViewController() -> UIViewController? {
-        
-        if loadingViewController != nil && loadingViewController.parentViewController == self {
-            return loadingViewController
-        }
-        else if loginViewController != nil && loginViewController.parentViewController == self {
-            return loginViewController
-        }
-        else if tabViewController != nil && tabViewController.parentViewController == self {
-            return tabViewController
-        }
-        
-        return nil
-    }
-    
-    // Switch to the provided view controller
-    private func switchViewController(to toController:UIViewController?) {
-        
-        var fromController: UIViewController? = findCurrentViewController()
-        
-        if fromController == toController {
-            return
-        }
-        
-        if fromController != nil {
-            fromController!.willMoveToParentViewController(nil)
-            fromController!.view.removeFromSuperview()
-            fromController!.removeFromParentViewController()
-        }
-        
-        if toController != nil {
-            self.addChildViewController(toController!)
-            self.view.insertSubview(toController!.view, atIndex: 0)
-            toController!.didMoveToParentViewController(self)
-        }
+        self.dismissViewControllerAnimated(false, completion: nil)
+        self.performSegueWithIdentifier("loadingSegue", sender: self)
     }
     
     // Generic error handler shows popup before forcing login
@@ -160,5 +115,6 @@ class MainViewController: UIViewController {
             self.showLogin()
         })
     }
+
 
 }
