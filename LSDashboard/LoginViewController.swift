@@ -73,7 +73,8 @@ class LoginViewController: UIViewController {
             
             dispatch_async(dispatch_get_main_queue()) {
                 if error == nil {
-                    LearningStudio.api.proceedWithCredentials()
+                    LearningStudio.api.saveCredentials()
+                    (self.presentingViewController as! MainViewController).showLoading()
                     self.loginMessageLabel.text = ""
                     self.passwordTextField.text = ""
                     self.usernameTextField.text = ""

@@ -212,10 +212,10 @@ class SettingsTabViewController: UITableViewController {
             NSNotificationCenter.defaultCenter().postNotificationName("RefreshOptions", object:self)
         }
         else if indexPath.section == refreshSectionIndex { // refresh data
-            LearningStudio.api.proceedWithRefresh()
+            (self.presentingViewController as! MainViewController).showLoading()
         }
         else if indexPath.section == logoutSectionIndex { // logout
-            LearningStudio.api.promptForCredentials()
+            (self.presentingViewController as! MainViewController).showLogin()
         }
     }
     

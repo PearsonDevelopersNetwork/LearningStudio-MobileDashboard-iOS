@@ -46,41 +46,44 @@ class LoadingViewController: UIViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshData:", name: "RefreshCourses", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshData:", name: "RefreshTimeZones", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshData:", name: "RefreshUpcomingEvents", object: nil)
-        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "recoverFromError:", name: "DataLoadError", object: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
         // reset loading progress
         loadingProgress.progress = 0
         
-
-        
-        // load the user's activity
-        LearningStudio.api.getMe({ (error) -> Void in
-            
+        // define procedure  to load the user's activity
+        var loadData = { () -> Void in
             // User details have been loaded during authentication with /me
             var firstName = LearningStudio.api.userData?.me!["firstName"] as! String
             self.greetingLabel.text = "Welcome, \(firstName)!"
             
-            if error == nil {
-                LearningStudio.api.reloadData({ (error) -> Void in
-                    dispatch_async(dispatch_get_main_queue()) {
-                        if error == nil {
-                            // show the main display
-                            LearningStudio.api.proceedToDashboard()
-                        }
-                        else {
-                            // log the user out
-                            LearningStudio.api.promptForCredentials()
-                        }
+            LearningStudio.api.reloadData({ (error) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    if error == nil {
+                        // show the main display
+                        (self.presentingViewController as! MainViewController).showTabs()
                     }
-                    self.incrementProgress()
-                })
-            }
-            else {
-               LearningStudio.api.promptForCredentials()
-            }
-        })
+                }
+                self.incrementProgress()
+            })
+        }
+        
+        // load the user if necessary
+        if LearningStudio.api.userData?.me == nil {
+            LearningStudio.api.getMe({ (error) -> Void in
+                if error == nil {
+                    loadData()
+                }
+                else {
+                    (self.presentingViewController as! MainViewController).showLogin()
+                }
+            })
+        }
+        else { // otherwise, just the data
+            loadData()
+        }
         
     }
 
@@ -102,5 +105,20 @@ class LoadingViewController: UIViewController {
             self.loadingProgress.setProgress(self.loadingProgress.progress + 0.25, animated: true)
         }
     }
-
+    
+    func recoverFromError(notification: NSNotification) {
+        recoverFromError(notification.userInfo!["shortReason"] as! String, longReason: notification.userInfo!["longReason"] as! String)
+    }
+    
+    // Generic error handler shows popup before forcing login
+    func recoverFromError(shortReason: String, longReason: String) {
+        
+        let alert = UIAlertController(title: shortReason, message:longReason, preferredStyle: .Alert)
+        let action = UIAlertAction(title:"Login Again", style: .Default) { UIAlertAction in
+             (self.presentingViewController as! MainViewController).showLogin()
+        }
+        alert.addAction(action)
+        presentViewController(alert, animated:true, completion: nil)
+    }
+    
 }

@@ -79,9 +79,6 @@ class LearningStudio {
     
     // MARK: - Public Variables
     
-    // handle to view for login/logout
-    var mainView: MainViewController!
-    
     // user data for app to share
     var lastLoadTime: String?   // date to compare for detecting new data
     var userData: UserData? { // exposed user data that reloads if archived
@@ -141,7 +138,7 @@ class LearningStudio {
     }
     
     // save user credentials for future app launches
-    private func saveCredentials() {
+    func saveCredentials() {
         NSUserDefaults.standardUserDefaults().setValue(username, forKey: defaultUsernameKey)
         keychainWrapper.setObject(password, forKey:kSecValueData)
     }
@@ -165,7 +162,7 @@ class LearningStudio {
     }
     
     // clears credentials and all associated data
-    private func clearCredentials() {
+    func clearCredentials() {
         // clear all variables
         username = ""
         password = ""
@@ -1039,50 +1036,18 @@ class LearningStudio {
         return dateFormatter.stringFromDate(date!)
     }
     
+    // MARK - Composite data loads
     
-    // MARK: - UI Access Management
-    
-    // NOT ideal to control the view here, but better than referencing everywhere...
-    
-    // Shows login screen
-    func promptForCredentials() {
-        clearCredentials() // clear credentials before showing login UI
-        mainView.showLogin()
-    }
-    
-    // Shows loading screen after login
-    func proceedWithCredentials() {
-        if tokens != nil {
-            if(tokenExpireDate!.compare(NSDate()) == NSComparisonResult.OrderedDescending) {
-                mainView.showLoading()
-                saveCredentials() // credentials can be saved now
-            }
-        }
-    }
-    
-    // Shows loading screen during data refresh
-    func proceedWithRefresh() {
-        if tokens != nil {  // should have authenticated before
-            mainView.showLoading()
-        }
-    }
-    
-    // Transitions from loading screen to main display
-    func proceedToDashboard() {
-        if tokens != nil {  // should have authenticated before and still be valid.
-            if(tokenExpireDate!.compare(NSDate()) == NSComparisonResult.OrderedDescending) {
-                mainView.showTabs()
-            }
-        }
-    }
-    
-    // Handles errors with no chance of recovery by logging out after displaying message
+
+    // reports errors with no chance of recovery
     private func recoverFromError(shortReason: String, longReason: String) {
         clearCredentials() // clear credentials before logging out
-        mainView.recoverFromError(shortReason, longReason: longReason)
+        
+        var userInfo = [ "shortReason" : shortReason, "longReason" : longReason ]
+        dispatch_async(dispatch_get_main_queue()) {
+            NSNotificationCenter.defaultCenter().postNotificationName("DataLoadError", object:self, userInfo: userInfo)
+        }
     }
-    
-    // MARK - Composite data loads
     
     // Loads all data required for displaying dashboard
     private func loadInitialData(callback: (error:NSError?) -> Void) {
@@ -1109,9 +1074,7 @@ class LearningStudio {
                                 self.refreshUpcomingEvents() // do internal processing of new event data
                             }
                             else {
-                                dispatch_async(dispatch_get_main_queue()) {
-                                    self.recoverFromError("Unreachable data", longReason: "Activity data could not be retrieved.")
-                                }
+                                self.recoverFromError("Unreachable data", longReason: "Activity data could not be retrieved.")
                             }
                         })
                     }
@@ -1134,9 +1097,7 @@ class LearningStudio {
                         self.refreshHappenings() // do internal processing of new happening data
                     }
                     else {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            self.recoverFromError("Unreachable data", longReason: "Happenings data could not be retrieved.")
-                        }
+                        self.recoverFromError("Unreachable data", longReason: "Happenings data could not be retrieved.")
                     }
 
                 })
@@ -1150,9 +1111,7 @@ class LearningStudio {
                         self.refreshGradesToDate() // do internal processing of new grade data
                     }
                     else {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            self.recoverFromError("Unreachable data", longReason: "Grades data could not be retrieved.")
-                        }
+                        self.recoverFromError("Unreachable data", longReason: "Grades data could not be retrieved.")
                     }
                 })
                 LearningStudio.api.getAnnouncements({ (error) -> Void in
@@ -1165,18 +1124,14 @@ class LearningStudio {
                         self.refreshAnnouncements() // do internal processing of new announcement data
                     }
                     else {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            self.recoverFromError("Unreachable data", longReason: "Announcements data could not be retrieved.")
-                        }
+                        self.recoverFromError("Unreachable data", longReason: "Announcements data could not be retrieved.")
                     }
 
                 })
             }
             else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    callback(error: error)
-                    self.recoverFromError("Unreachable data", longReason: "Course data could not be retrieved.")
-                }
+                callback(error: error)
+                self.recoverFromError("Unreachable data", longReason: "Course data could not be retrieved.")
             }
             
         })

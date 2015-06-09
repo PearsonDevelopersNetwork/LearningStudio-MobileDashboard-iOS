@@ -35,7 +35,7 @@ import UIKit
 class MainViewController: UIViewController {
     private var firstLoad = true
     
-    // windows are loaded and can be segued to here
+    // windows are loaded and can be segued to from here
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -44,10 +44,6 @@ class MainViewController: UIViewController {
         }
         
         firstLoad = false
-        
-        // The api class does some of the view switching
-        // This class has references to all views
-        LearningStudio.api.mainView = self
  
         // Only need to prompt for credential if they're missing
         if LearningStudio.api.restoreCredentials() {
@@ -86,6 +82,7 @@ class MainViewController: UIViewController {
     
     // Login will be viewed when credentials are missing, logout occurs, or error occurs
     func showLogin() {
+        LearningStudio.api.clearCredentials()
         self.dismissViewControllerAnimated(false, completion: nil)
         self.performSegueWithIdentifier("loginSegue", sender: self)
     }
@@ -95,16 +92,4 @@ class MainViewController: UIViewController {
         self.dismissViewControllerAnimated(false, completion: nil)
         self.performSegueWithIdentifier("loadingSegue", sender: self)
     }
-    
-    // Generic error handler shows popup before forcing login
-    func recoverFromError(shortReason: String, longReason: String) {
-        let alert = UIAlertController(title: shortReason, message:longReason, preferredStyle: .Alert)
-        let action = UIAlertAction(title:"Login Again", style: .Default, handler: nil)
-        alert.addAction(action)
-        presentViewController(alert, animated:true, completion: { () -> Void in
-            self.showLogin()
-        })
-    }
-
-
 }
