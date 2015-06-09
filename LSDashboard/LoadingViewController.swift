@@ -37,6 +37,8 @@ class LoadingViewController: UIViewController {
     @IBOutlet weak var loadingProgress: UIProgressView! // feedback on loading progress
     @IBOutlet weak var greetingLabel: UILabel!  // greeting with user's name
     
+    private var errorDuringLoad = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -50,6 +52,8 @@ class LoadingViewController: UIViewController {
     }
     
     override func viewWillAppear(animated: Bool) {
+        errorDuringLoad = false
+        
         // reset loading progress
         loadingProgress.progress = 0
         
@@ -107,11 +111,16 @@ class LoadingViewController: UIViewController {
     }
     
     func recoverFromError(notification: NSNotification) {
+        if errorDuringLoad {
+            return
+        }
+        
+        errorDuringLoad = true
         recoverFromError(notification.userInfo!["shortReason"] as! String, longReason: notification.userInfo!["longReason"] as! String)
     }
     
     // Generic error handler shows popup before forcing login
-    func recoverFromError(shortReason: String, longReason: String) {
+    private func recoverFromError(shortReason: String, longReason: String) {
         
         let alert = UIAlertController(title: shortReason, message:longReason, preferredStyle: .Alert)
         let action = UIAlertAction(title:"Login Again", style: .Default) { UIAlertAction in
