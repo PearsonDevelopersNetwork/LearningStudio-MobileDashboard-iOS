@@ -78,6 +78,10 @@ class SettingsTabViewController: UITableViewController {
         // monitor when options are updated. need to refresh the screen
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshData:", name: "RefreshOptions", object: nil)
     }
+    
+    deinit { // cleanup
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

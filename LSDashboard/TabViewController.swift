@@ -52,7 +52,10 @@ class TabViewController: UITabBarController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "diffAnnouncements:", name: "DiffAnnouncements", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "diffGrades:", name: "DiffGrades", object: nil)
 
-
+    }
+    
+    deinit { // cleanup
+        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
 
     override func viewWillAppear(animated: Bool) {

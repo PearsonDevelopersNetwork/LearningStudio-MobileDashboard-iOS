@@ -44,6 +44,10 @@ class DoneTabViewController: UITableViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshData:", name: "RefreshHappenings", object: nil)
     }
     
+    deinit { // cleanup
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     override func viewWillAppear(animated: Bool) {
         // clear any badge that was visible
         self.navigationController?.tabBarItem.badgeValue = nil

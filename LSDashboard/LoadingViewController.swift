@@ -51,6 +51,10 @@ class LoadingViewController: UIViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "recoverFromError:", name: "DataLoadError", object: nil)
     }
     
+    deinit { // cleanup
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     override func viewWillAppear(animated: Bool) {
         errorDuringLoad = false
         

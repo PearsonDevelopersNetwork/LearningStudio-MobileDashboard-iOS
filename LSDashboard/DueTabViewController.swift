@@ -59,6 +59,10 @@ class DueTabViewController: UITableViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "refreshData:", name: "RefreshUpcomingEvents", object: nil)
     }
     
+    deinit { // cleanup
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
